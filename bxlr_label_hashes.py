@@ -9,11 +9,29 @@ def main():
 	except Exception as e:
 		print str(e)
 		exit()
-
+	print('loading file: %s' % sc_hashes_file)
 	with open(sc_hashes_file, 'r') as f:
 		sc_hashes = json.load(f)
 
-	ranges = currentProgram.getMemory().getAddressRanges()
+	try:
+		choice = askChoice('Use Custom Address Range', 'Select Address Range', ['Main executable', 'RAM segment'], 'Main Executable')
+	except Exception as e:
+		sys.exit(0)
+
+	if choice == 'RAM segment':
+		try:
+			base = askAddress('Segment Base', 'Enter segment base to process')
+			pages = currentProgram.getMemory().getAddressRanges()
+			for page in pages:
+				if page.minAddress == base:
+					ranges = page
+					break
+		except:
+			sys.exit(0)
+	else:
+		print('Using Main Program Base...')
+		ranges = currentProgram.getMemory().getAddressRanges()
+
 	for r in ranges:
 		begin = r.getMinAddress()
 		length = r.getLength()
@@ -25,7 +43,7 @@ def main():
 			if (hash_func):
 				try:
 					scalar_int = int(str(hash_func), 16)
-					
+					#lazy check
 					if scalar_int > 0xffff:
 						#print scalar_int	
 						k = sc_hashes['symbol_hashes'][str(scalar_int)]
@@ -38,7 +56,7 @@ def main():
 						#print hash_type
 
 						equate = '%s_%s_%s' % (symbol_lib, symbol_name, hash_type)
-						print 'Found hash at addr: ', ins.address, 'hash_func: ', hash_func, 'equate: ', equate
+						print('Found hash at addr: ', ins.address, 'hash_func: ', hash_func, 'equate: ', equate)
 						#print '\t', equate
 						#todo fix this shit ... make bookmarks too
 						el = getEquates(ins, 1)
@@ -48,7 +66,7 @@ def main():
 						#createLabel(ins.address, equate, True, SourceType.ANALYSIS)
 
 				except Exception as e:
-					#print e
+					print(e)
 					pass
 
 			ins =  getInstructionAfter(ins)

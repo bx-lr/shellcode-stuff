@@ -6,9 +6,9 @@ def run(inString,fName):
 
 
 def get_pseudocode():
-    pseudocode = ,fName):
+    pseudocode = '''adler32_666(inString,fName):
     return zlib.adler32(inString.upper(), 666) & 0xffffffff
-
+'''
     return pseudocode
 
 def get_name():

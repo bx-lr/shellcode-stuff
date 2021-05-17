@@ -1,3 +1,4 @@
+import zlib
 ROTATE_BITMASK = {
     8  : 0xff,
     16 : 0xffff,

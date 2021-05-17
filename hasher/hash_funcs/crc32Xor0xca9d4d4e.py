@@ -6,9 +6,9 @@ def run(inString,fName):
 
 
 def get_pseudocode():
-    pseudocode = ,fName):
+    pseudocode = '''crc32Xor0xca9d4d4e(inString,fName):
     return (0xffffffff & (zlib.crc32(inString))) ^ 0xca9d4d4e
-
+'''
     return pseudocode
 
 def get_name():

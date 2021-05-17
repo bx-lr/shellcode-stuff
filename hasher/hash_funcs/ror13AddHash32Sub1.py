@@ -3,16 +3,16 @@ from utils.util import *
 def run(inString,fName):
     
     '''Same as ror13AddHash32, but subtract 1 afterwards'''
-    return ror13AddHash32(inString,fName) - 1
-
-
+    if inString is None:
+        return -1
+    val = 0
+    for i in inString:
+        val = ror(val, 0xd, 32)
+        val += ord(i)
+    return val -1
 
 def get_pseudocode():
-    pseudocode = ,fName):
-    '''Same as ror13AddHash32, but subtract 1 afterwards'''
-    return ror13AddHash32(inString,fName) - 1
-
-pseudocode_ror13AddHash32 = '''acc := 0;
+    pseudocode = '''acc := 0;
 for c in input_string {
    acc := ROR(acc, 13);
    acc := acc + c;

@@ -20,7 +20,7 @@ def run(inString,fName):
 
 
 def get_pseudocode():
-    pseudocode = ,fName):
+    pseudocode = '''crc32bzip2lower(inString, fName):
     crc32_table = [0] * 256
     for i in xrange(256):
         v = i << 24
@@ -36,7 +36,7 @@ def get_pseudocode():
         result = (crc32_table[ ord(c.lower()) ^ ((result >> 24) & 0xff) ] ^ (result << 8)) & 0xffffffff
 
     return (result ^ 0xffffffff) & 0xffffffff
-
+'''
     return pseudocode
 
 def get_name():
