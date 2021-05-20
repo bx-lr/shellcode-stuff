@@ -5,7 +5,7 @@ from ghidra.program.model.symbol import SourceType
 
 def main():
 	try:
-		sc_hashes_file = askFile("sc_hashes.json", "sc_hashes.json").getPath()
+		sc_hashes_file = askFile("Load json file", "Select json").getPath()
 	except Exception as e:
 		print str(e)
 		exit()
@@ -17,15 +17,11 @@ def main():
 		choice = askChoice('Use Custom Address Range', 'Select Address Range', ['Main executable', 'RAM segment'], 'Main Executable')
 	except Exception as e:
 		sys.exit(0)
-
+	base = None
 	if choice == 'RAM segment':
 		try:
 			base = askAddress('Segment Base', 'Enter segment base to process')
-			pages = currentProgram.getMemory().getAddressRanges()
-			for page in pages:
-				if page.minAddress == base:
-					ranges = page
-					break
+			ranges = currentProgram.getMemory().getAddressRanges()
 		except:
 			sys.exit(0)
 	else:
@@ -33,15 +29,26 @@ def main():
 		ranges = currentProgram.getMemory().getAddressRanges()
 
 	for r in ranges:
+		if base:
+			if r.getMinAddress() != base:
+				continue
 		begin = r.getMinAddress()
 		length = r.getLength()
 		ins = getInstructionAt(begin)
+		print('Looking for function hashes at ', begin)
+		print('size: ', length)
 		while(ins==None):
-			ins =  getInstructionAfter(ins)
+			ins = getInstructionAfter(ins)
 		for i in range(length):
+
+			if ins.minAddress > r.maxAddress:
+				break
 			hash_func = ins.getDefaultOperandRepresentation(1)
+			#print ins.getMinAddress(), hash_func
+
 			if (hash_func):
 				try:
+
 					scalar_int = int(str(hash_func), 16)
 					#lazy check
 					if scalar_int > 0xffff:
@@ -66,7 +73,7 @@ def main():
 						#createLabel(ins.address, equate, True, SourceType.ANALYSIS)
 
 				except Exception as e:
-					print(e)
+					#print(e)
 					pass
 
 			ins =  getInstructionAfter(ins)

