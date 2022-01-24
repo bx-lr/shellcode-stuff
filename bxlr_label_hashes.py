@@ -66,8 +66,8 @@ def main():
 						print('Found hash at addr: ', ins.address, 'hash_func: ', hash_func, 'equate: ', equate)
 						#print '\t', equate
 						#todo fix this shit ... make bookmarks too
-						el = getEquates(ins, 1)
-						tmp_list = [e.toString() for e in el]
+						equate_list = getEquates(ins, 1)
+						tmp_list = [e.toString() for e in equate_list]
 						if equate not in tmp_list:
 							createEquate(ins, 1, equate)
 						#createLabel(ins.address, equate, True, SourceType.ANALYSIS)
